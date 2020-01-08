@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name='arx',
-    use_scm_verion=True,
+    use_scm_version=True,
     setup_requires=['setuptools_scm'],
     author='Grayson Head',
     author_email='grayson@graysonhead.net',
