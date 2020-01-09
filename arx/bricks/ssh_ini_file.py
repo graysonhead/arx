@@ -5,7 +5,8 @@ from arx.core.brick import ArxBrick
 from needystates import State, StateOperations, need_handler
 import configparser
 from needystates.need_filters import *
-
+import os
+from tempfile import NamedTemporaryFile
 
 @ArxRegistry.brick
 class SSHINIConf(ArxBrick):
@@ -30,10 +31,10 @@ class SSHINIConf(ArxBrick):
         else:
             c_config = configparser.ConfigParser()
             c_config.read_string(raw_config_file)
-            parsed_dict = {s:dict(c_config.items()) for s in c_config.sections()}
+            parsed_dict = {s: dict(c_config.items(s)) for s in c_config.sections()}
         return self.get_state_object(parsed_dict)
 
-    @ArxRegistry.handler(AddressPathExactFilter(['INIConf', '/etc/yum.repos.d/mariadb.repo']))
+    @ArxRegistry.handler(AddressPathContainsFilter('INIConf'))
     def set_config_file_value(need, plugin):
         path = need.address_path[1]
         try:
@@ -46,21 +47,16 @@ class SSHINIConf(ArxBrick):
                 raise e
         c_config = configparser.ConfigParser()
         c_config.read_string(raw_config_file)
-        attr_path = []
-        if need.parent_states:
-            attr_path = need.parent_states
-        attr_path.append(need.attribute)
-        current_level = attr_path[0]
-        for attr in attr_path:
-            if attr != need.attribute:
-                current_level[attr] = {}
-                current_level = c_config[attr]
-            else:
-                current_level.update({need.attribute: need.value})
-        output = ""
-        c_config.write(output)
-        print(output)
-
+        if need.parent_states[0] not in c_config.sections():
+            c_config.add_section(need.parent_states[0])
+        c_config.set(need.parent_states[0], need.attribute, need.value)
+        f = NamedTemporaryFile(mode='w+', delete=False)
+        with open(f.name, 'w+') as new:
+            c_config.write(new)
+        with open(f.name, 'r') as new:
+            text = new.read()
+            plugin.send_command(f"echo \"{text}\" > {need.address_path[1]}")
+        os.unlink(f.name)
 
 
 

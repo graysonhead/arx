@@ -1,22 +1,6 @@
-# from arx.core.brick import ArxBrick
 from functools import wraps
 from needystates.exceptions import NeedyStatesNoMatch
 
-# class Singleton(type):
-#     _instances = {}
-#     def __call__(cls, *args, **kwargs):
-#         if cls not in cls._instances:
-#             cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-#         return cls._instances[cls]
-#
-#
-# class ArxRegistry(object, metaclass=Singleton):
-#     registered_bricks = []
-#
-#     @staticmethod
-#     def brick(self, cls):
-#         self.registered_bricks.append(brick)
-#         return brick
 
 REGISTERED_BRICKS = []
 REGISTERED_HANDLERS = []
@@ -30,11 +14,6 @@ class ArxRegistry:
     def brick(cls):
         REGISTERED_BRICKS.append(cls)
         return cls
-
-    # @staticmethod
-    # def handler(mtd):
-    #     REGISTERED_HANDLERS.append(mtd)
-    #     return mtd
 
     @staticmethod
     def handler(*filter_args):
@@ -83,12 +62,3 @@ def with_plugin(func):
     return inner
 
 
-# def need_handler(*filter_args):
-#     def wrapper(func):
-#         REGISTERED_HANDLERS.append(func)
-#         @wraps(func)
-#         def inner(need, plugin):
-#             if all([i.check_filter(need) for i in filter_args]):
-#                 return func(need, plugin)
-#             return inner
-#         return wrapper

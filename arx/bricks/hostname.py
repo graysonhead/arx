@@ -30,7 +30,3 @@ class HostName(ArxBrick):
     @ArxRegistry.handler(AttributeFilter('hostname'), AddressPathExactFilter(['HostName']), OperationFilter(StateOperations.SET))
     def set_host_name(need, plugin):
         plugin.send_command(f'hostnamectl set-hostname {need.value}')
-
-    @ArxRegistry.handler(AttributeFilter('doesnotexist'))
-    def notpls(need, plugin):
-        print("I shouldn't run")
