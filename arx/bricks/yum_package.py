@@ -1,9 +1,15 @@
 from arx.plugins.ssh import SSHPlugin
 from arx.core.registry import ArxRegistry
 from arx.core.brick import ArxBrick
-from needystates import State, StateOperations
+from needystates import State, StateOperations, Need
+from needystates.operations import Operations
 from needystates.need_filters import *
 
+
+class PackageOperations(Operations):
+    INSTALL = 1
+    UPGRADE = 2
+    UNINSTALL = 3
 
 class PackageState(State):
     attribute_descriptors = {
@@ -39,8 +45,29 @@ class YumPackage(ArxBrick):
             package_arch = package_name_arch[1]
             package_version = items[1]
             state.update({package_name: {'installed': True, 'arch': package_arch, 'version': package_version}})
-        for package in self.desired_state.config_keys:
-            if package not in state.keys():
-                state.update({package: {'installed': False}})
         return self.get_state_object(state)
+
+    def determine_needs(self, strict=None):
+        needs = []
+        self.current_state = self.get_cstate()
+        packages_requested = self.desired_state.render_dict()
+        packages_installed = self.current_state.render_dict()
+        for package, values in packages_requested.items():
+            if package not in packages_installed and values['installed']:
+                install_version = None
+                if values.get('version', None):
+                    install_version = values['version']
+                needs.append(Need(package,
+                                  PackageOperations.INSTALL,
+                                  metadata=self.get_state_metadata(),
+                                  address_path=self.get_address_path(),
+                                  value=install_version))
+        return needs
+
+    @ArxRegistry.handler(OperationFilter(PackageOperations.INSTALL))
+    def install_package(need, plugin):
+        version_string = ''
+        if need.value:
+            version_string = f"-{need.value}"
+        return plugin.send_command(f"yum install {need.attribute}{version_string}")
 
