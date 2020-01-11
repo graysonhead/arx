@@ -13,6 +13,7 @@ class SSHINIConf(ArxBrick):
     state_template = State
     plugin_class = SSHPlugin
     name = "INIConf"
+    default_strict = True
 
     def __init__(self, path, desired_state, plugin_config):
         self.path = path
@@ -57,7 +58,4 @@ class SSHINIConf(ArxBrick):
             text = new.read()
             plugin.send_command(f"echo \"{text}\" > {need.address_path[1]}")
         os.unlink(f.name)
-
-
-
 

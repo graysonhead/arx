@@ -11,6 +11,7 @@ class ArxBrick(object):
     current_state = None
     name = ''
     state_template = State
+    default_strict = False
 
 
     def init_plugin(self):
@@ -35,9 +36,13 @@ class ArxBrick(object):
     def get_cstate(self):
         raise ArxNotImplementedException(msg="This brick doesn't implement the 'get_cstate' method")
 
-    def determine_needs(self):
+    def determine_needs(self, strict=None):
         self.current_state = self.get_cstate()
-        return self.desired_state.determine_needs(self.current_state, strict=True)
+        if strict:
+            strictness = strict
+        else:
+            strictness = self.default_strict
+        return self.desired_state.determine_needs(self.current_state, strict=strictness)
 
 
 
