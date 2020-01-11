@@ -69,5 +69,5 @@ class YumPackage(ArxBrick):
         version_string = ''
         if need.value:
             version_string = f"-{need.value}"
-        return plugin.send_command(f"yum install {need.attribute}{version_string}")
+        return plugin.send_command(f"yum install {need.attribute}{version_string} -y")
 
