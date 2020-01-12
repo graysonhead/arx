@@ -43,8 +43,10 @@ class YumPackage(ArxBrick):
             package_name_arch = items[0].split('.')
             package_name = package_name_arch[0]
             package_arch = package_name_arch[1]
-            package_version = items[1]
-            state.update({package_name: {'installed': True, 'arch': package_arch, 'version': package_version}})
+            state.update({package_name: {'installed': True, 'arch': package_arch}})
+            if len(items) > 1:
+                package_version = items[1]
+                state[package_name].update({'version': package_version})
         return self.get_state_object(state)
 
     def determine_needs(self, strict=None):
