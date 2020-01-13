@@ -11,6 +11,7 @@ class PackageOperations(Operations):
     UPGRADE = 2
     UNINSTALL = 3
 
+
 class PackageState(State):
     attribute_descriptors = {
         'installed': {
@@ -20,6 +21,7 @@ class PackageState(State):
             StateOperations.SET: 'This will upgrade the package from #old_value to #value'
         }
     }
+
 
 @ArxRegistry.brick
 class YumPackage(ArxBrick):
